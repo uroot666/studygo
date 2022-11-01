@@ -8,7 +8,7 @@ import (
 
 func main() {
 	// log := mylogger.Newlog("debug")
-	log := mylogger.NewFileLogger("Info", "./", "access.log", 512)
+	log := mylogger.NewFileLogger("Info", "./", "access.log", 1024)
 	defer log.Close()
 	for {
 		log.Debug("Debug: %v:%v", "a", "b")

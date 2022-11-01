@@ -81,7 +81,7 @@ func (f *FileLogger) splitFile(file *os.File) (*os.File, error) {
 	return fileObj, nil
 }
 
-func (f FileLogger) log(lv LogLevel, format string, a ...interface{}) {
+func (f *FileLogger) log(lv LogLevel, format string, a ...interface{}) {
 	if f.Enable(lv) {
 		msg := fmt.Sprintf(format, a...)
 		now := time.Now()
@@ -108,7 +108,7 @@ func (f FileLogger) log(lv LogLevel, format string, a ...interface{}) {
 	}
 }
 
-func (f FileLogger) Enable(logLevel LogLevel) bool {
+func (f *FileLogger) Enable(logLevel LogLevel) bool {
 	return f.Level <= logLevel
 }
 
@@ -122,28 +122,28 @@ func (f *FileLogger) checkSize(file *os.File) bool {
 	return fileInfo.Size() >= f.maxFileSize
 }
 
-func (f FileLogger) Debug(msg string, a ...interface{}) {
+func (f *FileLogger) Debug(msg string, a ...interface{}) {
 	f.log(DEBUG, msg, a...)
 
 }
 
-func (f FileLogger) Trace(msg string, a ...interface{}) {
+func (f *FileLogger) Trace(msg string, a ...interface{}) {
 	f.log(TRACE, msg, a...)
 }
 
-func (f FileLogger) Info(msg string, a ...interface{}) {
+func (f *FileLogger) Info(msg string, a ...interface{}) {
 	f.log(INFO, msg, a...)
 }
 
-func (f FileLogger) Warning(msg string, a ...interface{}) {
+func (f *FileLogger) Warning(msg string, a ...interface{}) {
 	f.log(WARNING, msg, a...)
 }
 
-func (f FileLogger) Error(msg string, a ...interface{}) {
+func (f *FileLogger) Error(msg string, a ...interface{}) {
 	f.log(ERROR, msg, a...)
 }
 
-func (f FileLogger) Fatal(msg string, a ...interface{}) {
+func (f *FileLogger) Fatal(msg string, a ...interface{}) {
 	f.log(FATAL, msg, a...)
 }
 

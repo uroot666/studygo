@@ -24,11 +24,11 @@ func Newlog(levelStr string) ConsoleLogger {
 	}
 }
 
-func (c ConsoleLogger) Enable(logLevel LogLevel) bool {
+func (c *ConsoleLogger) Enable(logLevel LogLevel) bool {
 	return c.Level <= logLevel
 }
 
-func (c ConsoleLogger) log(lv LogLevel, format string, a ...interface{}) {
+func (c *ConsoleLogger) log(lv LogLevel, format string, a ...interface{}) {
 	if c.Enable(lv) {
 		msg := fmt.Sprintf(format, a...)
 		now := time.Now()
@@ -37,26 +37,26 @@ func (c ConsoleLogger) log(lv LogLevel, format string, a ...interface{}) {
 	}
 }
 
-func (c ConsoleLogger) Debug(msg string, a ...interface{}) {
+func (c *ConsoleLogger) Debug(msg string, a ...interface{}) {
 	c.log(DEBUG, msg, a...)
 }
 
-func (c ConsoleLogger) Trace(msg string, a ...interface{}) {
+func (c *ConsoleLogger) Trace(msg string, a ...interface{}) {
 	c.log(TRACE, msg, a...)
 }
 
-func (c ConsoleLogger) Info(msg string, a ...interface{}) {
+func (c *ConsoleLogger) Info(msg string, a ...interface{}) {
 	c.log(INFO, msg, a...)
 }
 
-func (c ConsoleLogger) Warning(msg string, a ...interface{}) {
+func (c *ConsoleLogger) Warning(msg string, a ...interface{}) {
 	c.log(WARNING, msg, a...)
 }
 
-func (c ConsoleLogger) Error(msg string, a ...interface{}) {
+func (c *ConsoleLogger) Error(msg string, a ...interface{}) {
 	c.log(ERROR, msg, a...)
 }
 
-func (c ConsoleLogger) Fatal(msg string, a ...interface{}) {
+func (c *ConsoleLogger) Fatal(msg string, a ...interface{}) {
 	c.log(FATAL, msg, a...)
 }
