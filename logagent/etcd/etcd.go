@@ -49,14 +49,37 @@ func Getconf(key string) (logEntryConf []*LogEntry, err error) {
 	return
 }
 
+func WatchConf(key string, newConfCh chan<- []*LogEntry) {
+	ch := cli.Watch(context.Background(), key)
+	for wresp := range ch {
+		for _, evt := range wresp.Events {
+			fmt.Printf("Type: %v key: %v value: %v\n", evt.Type, evt.Kv.Key, evt.Kv.Value)
+			// 通知别人
+			// 1. 先判断操作的类型
+
+			var newConf []*LogEntry
+			if evt.Type != clientv3.EventTypeDelete {
+				err := json.Unmarshal(evt.Kv.Value, &newConf)
+				if err != nil {
+					fmt.Printf("unmarshal failed, err: %v\n", err)
+					continue
+				}
+			}
+			fmt.Printf("get new conf:%v\n", &newConf)
+			newConfCh <- newConf
+
+		}
+	}
+}
+
 // 用于向etcd发送测试数据
-// func PutTest() {
-// 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-// 	value := `[{"path":"/c.log","topic":"c"},{"path":"/b.log","topic":"b"}]`
-// 	_, err := cli.Put(ctx, "/xxx", value)
-// 	cancel()
-// 	if err != nil {
-// 		fmt.Printf("put to etcd failed, err: %v\n", err)
-// 		return
-// 	}
-// }
+func PutTest() {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	value := `[{"path":"./a.log","topic":"a"},{"path":"./b.log","topic":"b"}]`
+	_, err := cli.Put(ctx, "/xxx", value)
+	cancel()
+	if err != nil {
+		fmt.Printf("put to etcd failed, err: %v\n", err)
+		return
+	}
+}
