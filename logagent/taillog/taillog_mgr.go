@@ -24,7 +24,10 @@ func Init(logEntryConf []*etcd.LogEntry) {
 	}
 	for _, logEntry := range logEntryConf {
 		// conf: *etcd.LogEntry
-		NewTailTask(logEntry.Path, logEntry.Topic)
+		// 初始化的时候起了多少个tailtask，都要记下来，为了后续判断方便
+		tailObj := NewTailTask(logEntry.Path, logEntry.Topic)
+		mk := fmt.Sprintf("%s_%s", logEntry.Path, logEntry.Topic)
+		taskMgr.taskMap[mk] = tailObj
 	}
 
 	go taskMgr.run()
@@ -40,6 +43,34 @@ func (t tailLogMgr) run() {
 			// 2. 配置删除
 			// 3. 配置变更
 			fmt.Println("新的配置来了,", newConfg)
+			for _, conf := range newConfg {
+				mk := fmt.Sprintf("%s_%s", conf.Path, conf.Topic)
+				_, ok := t.taskMap[mk]
+				if ok {
+					// 原来就有
+					continue
+				} else {
+					// 新增
+					tailObj := NewTailTask(conf.Path, conf.Topic)
+					t.taskMap[mk] = tailObj
+				}
+			}
+			// 找出原来 t.taskMap 有，但是newConf中没有的
+			for _, c1 := range t.logEntry {
+				isDelete := true
+				for _, c2 := range newConfg {
+					if c2.Path == c1.Path && c2.Path == c1.Path {
+						isDelete = false
+						continue
+					}
+				}
+				if isDelete {
+					// 把c1对应的这个tailObj给停掉
+					mk := fmt.Sprintf("%s_%s", c1.Path, c1.Topic)
+					t.taskMap[mk].cancelFunc()
+				}
+
+			}
 		default:
 			time.Sleep(time.Second * 1)
 

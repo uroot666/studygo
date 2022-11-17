@@ -73,10 +73,10 @@ func WatchConf(key string, newConfCh chan<- []*LogEntry) {
 }
 
 // 用于向etcd发送测试数据
-func PutTest() {
+func PutTest(etcdConfKey string) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	value := `[{"path":"./a.log","topic":"a"},{"path":"./b.log","topic":"b"}]`
-	_, err := cli.Put(ctx, "/xxx", value)
+	value := `[{"path":"./a.log","topic":"a"}]`
+	_, err := cli.Put(ctx, etcdConfKey, value)
 	cancel()
 	if err != nil {
 		fmt.Printf("put to etcd failed, err: %v\n", err)

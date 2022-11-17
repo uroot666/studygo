@@ -9,6 +9,7 @@ import (
 	"github.com/uroot666/studygo/logagent/etcd"
 	"github.com/uroot666/studygo/logagent/kafka"
 	"github.com/uroot666/studygo/logagent/taillog"
+	"github.com/uroot666/studygo/logagent/utils"
 	"gopkg.in/ini.v1"
 )
 
@@ -38,7 +39,13 @@ func main() {
 	fmt.Println("init etcd success")
 
 	// 2.1 从etcd获取配置项
-	logEntryConf, err := etcd.Getconf(cfg.EtcdConf.Key)
+	// 为了实现每个logagent 都拉取自己独有的配置，所以要以自己的ip地址作为区分
+	ipStr, err := utils.GetOutboundIP()
+	if err != nil {
+		panic(err)
+	}
+	etcdConfKey := fmt.Sprintf(cfg.EtcdConf.Key, ipStr)
+	logEntryConf, err := etcd.Getconf(etcdConfKey)
 	if err != nil {
 		fmt.Printf("etcd.GetConf failed, err:%v\n", err)
 		return
@@ -53,7 +60,7 @@ func main() {
 	// 2.2 派一个哨兵去监视日志收集项的变化,有变化及时通知我的logagent实现热加载配置
 	newConfChan := taillog.NewConfChan() // 从taillog包中获取对外报漏的通道
 	wg.Add(1)
-	go etcd.WatchConf(cfg.EtcdConf.Key, newConfChan) // 哨兵发现变化会通知上面获取的通道
+	go etcd.WatchConf(etcdConfKey, newConfChan) // 哨兵发现变化会通知上面获取的通道
 	wg.Wait()
-	// etcd.PutTest()
+	// etcd.PutTest(etcdConfKey)
 }
